@@ -1,49 +1,72 @@
+from pyspark.sql import SparkSession
+from pyspark.ml.tuning import TrainValidationSplit
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+from pyspark.ml.tuning import ParamGridBuilder
+from pyspark.ml import Pipeline
+from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.feature import RFormula
 from pyspark.ml.linalg import Vectors
+
 denseVec = Vectors.dense(1.0, 2.0, 3.0)
 size = 3
-idx = [1, 2] # locations of non-zero elements in vector
+idx = [1, 2]  # locations of non-zero elements in vector
 values = [2.0, 3.0]
 sparseVec = Vectors.sparse(size, idx, values)
 
+# project-templates/python/pyspark_template/main.py
 
-# COMMAND ----------
+spark = SparkSession.builder \
+    .master("local") \
+    .appName("Test") \
+    .getOrCreate()
 
-df = spark.read.json("/data/simple-ml")
+# 데이터 준비
+
+# df = spark.read.json("/data/simple-ml")
+df = spark.read.json(
+    "file:///Users/lenani/SynologyDrive/test_personal/Spark-The-Definitive-Guide/data/simple-ml")
 df.orderBy("value2").show()
 
 
-# COMMAND ----------
+# weights 준비
 
-from pyspark.ml.feature import RFormula
 supervised = RFormula(formula="lab ~ . + color:value1 + color:value2")
 
 
-# COMMAND ----------
+# 데이터를 원하는 형태로 변경시킴
 
 fittedRF = supervised.fit(df)
 preparedDF = fittedRF.transform(df)
-preparedDF.show()
+# column "label" (output) 과 column "features" (input) 가 새로 생성됨.
+preparedDF.show(truncate=False)
 
 
-# COMMAND ----------
+# data 를 train set 과 test set 으로 분리
 
 train, test = preparedDF.randomSplit([0.7, 0.3])
 
 
-# COMMAND ----------
+# 모델 준비
 
-from pyspark.ml.classification import LogisticRegression
-lr = LogisticRegression(labelCol="label",featuresCol="features")
-
-
-# COMMAND ----------
-
-print lr.explainParams()
+lr = LogisticRegression(labelCol="label", featuresCol="features")
 
 
-# COMMAND ----------
+# 모델의 parameters 의 설명 출력
+
+print(lr.explainParams())
+
+
+# train 시킴
 
 fittedLR = lr.fit(train)
+
+# prediction 수행
+res = fittedLR.transform(test)
+res.show(truncate=False)
+res.createOrReplaceTempView("res")
+spark.sql("select prediction from res").show()
+
+#################################################################
 
 
 # COMMAND ----------
@@ -59,40 +82,36 @@ lr = LogisticRegression().setLabelCol("label").setFeaturesCol("features")
 
 # COMMAND ----------
 
-from pyspark.ml import Pipeline
 stages = [rForm, lr]
 pipeline = Pipeline().setStages(stages)
 
 
 # COMMAND ----------
 
-from pyspark.ml.tuning import ParamGridBuilder
 params = ParamGridBuilder()\
-  .addGrid(rForm.formula, [
-    "lab ~ . + color:value1",
-    "lab ~ . + color:value1 + color:value2"])\
-  .addGrid(lr.elasticNetParam, [0.0, 0.5, 1.0])\
-  .addGrid(lr.regParam, [0.1, 2.0])\
-  .build()
+    .addGrid(rForm.formula, [
+        "lab ~ . + color:value1",
+        "lab ~ . + color:value1 + color:value2"])\
+    .addGrid(lr.elasticNetParam, [0.0, 0.5, 1.0])\
+    .addGrid(lr.regParam, [0.1, 2.0])\
+    .build()
 
 
 # COMMAND ----------
 
-from pyspark.ml.evaluation import BinaryClassificationEvaluator
 evaluator = BinaryClassificationEvaluator()\
-  .setMetricName("areaUnderROC")\
-  .setRawPredictionCol("prediction")\
-  .setLabelCol("label")
+    .setMetricName("areaUnderROC")\
+    .setRawPredictionCol("prediction")\
+    .setLabelCol("label")
 
 
 # COMMAND ----------
 
-from pyspark.ml.tuning import TrainValidationSplit
 tvs = TrainValidationSplit()\
-  .setTrainRatio(0.75)\
-  .setEstimatorParamMaps(params)\
-  .setEstimator(pipeline)\
-  .setEvaluator(evaluator)
+    .setTrainRatio(0.75)\
+    .setEstimatorParamMaps(params)\
+    .setEstimator(pipeline)\
+    .setEvaluator(evaluator)
 
 
 # COMMAND ----------
@@ -101,4 +120,3 @@ tvsFitted = tvs.fit(train)
 
 
 # COMMAND ----------
-
