@@ -203,6 +203,10 @@ rt.transform(sales.select("Description")).show(20, False)
 
 # `.setGaps(False)` 를 하면 pattern 이 매칭하는 단어들만 리턴된다.
 # 여기서 "gaps" = "delimiters" 라서 pattern 이 delimiter 를 의미하는지(True, default), word 를 의미하는지(False) 를 선택하는 옵션이다.
+# 
+# ES 에 stopwords 와 keepwords 가 있는데, 서로 반대의 개념이다.
+# 여기서 `.setGaps(True)` 이면 stopwords 로 동작하고,
+# `.setGaps(False)` 이면 keepwords 로 동작하고, 
 
 from pyspark.ml.feature import RegexTokenizer
 
