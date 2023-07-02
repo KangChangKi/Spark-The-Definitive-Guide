@@ -235,6 +235,8 @@ ranks.vertices.orderBy(desc("pagerank")).select("id", "pagerank").show(n=10, tru
 #########################################################################################################
 
 # inDegrees 와 outDegrees 를 사용할 수 있다.
+# 
+# SNS 에서 in-degree 와 out-degree 그리고 그 비율을 사용해서 인플루언서를 찾는다고 한다.
 
 inDeg = stationGraph.inDegrees
 inDeg.orderBy(desc("inDegree")).show(n=5, truncate=False)
@@ -263,8 +265,6 @@ outDeg.orderBy(desc("outDegree")).show(n=5, truncate=False)
 # |Embarcadero at Sansome                       |14158    |
 # +---------------------------------------------+---------+
 # only showing top 5 rows
-
-# COMMAND ----------
 
 degreeRatio = inDeg.join(outDeg, "id")\
   .selectExpr("id", "double(inDegree)/double(outDegree) as degreeRatio")
