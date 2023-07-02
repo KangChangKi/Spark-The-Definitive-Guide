@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 
 # ./bin/pyspark --packages graphframes:graphframes:0.8.2-spark3.2-s_2.12
 
-spark = SparkSession.builder.appName("test1").master("local[*]")\
+spark = SparkSession.builder.appName("test1").master("local")\
   .config("spark.jars.packages", "graphframes:graphframes:0.8.2-spark3.2-s_2.12")\
   .getOrCreate()
 
