@@ -34,19 +34,55 @@ supervised = RFormula(formula="lab ~ . + color:value1 + color:value2")
 supervised.fit(simpleDF).transform(simpleDF).show()
 
 
-# COMMAND ----------
+# SQLTransformer 를 사용할 때 UDF 를 등록해서 사용할 수 있다.
+# 이러면 custom transformer 를 만들어서 사용할 필요가 없다.
+# SQLTransformer + UDF 조합으로 custom code 로 transforming 수행할 수 있기 때문이다.
 
 from pyspark.ml.feature import SQLTransformer
 
+from pyspark.sql.functions import udf
+from pyspark.sql.types import *
+
+@udf(returnType=IntegerType())
+def add2(a, b):
+    return a + b
+
+spark.udf.register("add2", add2)
+
 basicTransformation = SQLTransformer()\
   .setStatement("""
-    SELECT sum(Quantity), count(*), CustomerID
+    SELECT sum(Quantity), add2(sum(Quantity), 99), count(*), CustomerID
     FROM __THIS__
     GROUP BY CustomerID
   """)
 
 basicTransformation.transform(sales).show()
 
+# +-------------+-----------------------+--------+----------+
+# |sum(Quantity)|add2(sum(Quantity), 99)|count(1)|CustomerID|
+# +-------------+-----------------------+--------+----------+
+# |          119|                    218|      62|   14452.0|
+# |          440|                    539|     143|   16916.0|
+# |          630|                    729|      72|   17633.0|
+# |           34|                    133|       6|   14768.0|
+# |         1542|                   1641|      30|   13094.0|
+# |          854|                    953|     117|   17884.0|
+# |           97|                    196|      12|   16596.0|
+# |          290|                    389|      98|   13607.0|
+# |          541|                    640|      27|   14285.0|
+# |          244|                    343|      31|   16561.0|
+# |          756|                    855|      67|   15145.0|
+# |           83|                    182|      13|   16858.0|
+# |           56|                    155|       4|   13160.0|
+# |         8873|                   8972|      80|   16656.0|
+# |          241|                    340|      43|   16212.0|
+# |          258|                    357|      23|   13142.0|
+# |           67|                    166|      14|   13811.0|
+# |          569|                    668|      57|   12550.0|
+# |           84|                    183|       4|   15160.0|
+# |          954|                   1053|      82|   15067.0|
+# +-------------+-----------------------+--------+----------+
+# only showing top 20 rows
 
 # COMMAND ----------
 
