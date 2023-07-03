@@ -187,37 +187,112 @@ tkn = Tokenizer().setInputCol("Description").setOutputCol("DescOut")
 tokenized = tkn.transform(sales.select("Description"))
 tokenized.show(20, False)
 
+# +-----------------------------------+------------------------------------------+
+# |Description                        |DescOut                                   |
+# +-----------------------------------+------------------------------------------+
+# |RABBIT NIGHT LIGHT                 |[rabbit, night, light]                    |
+# |DOUGHNUT LIP GLOSS                 |[doughnut, lip, gloss]                    |
+# |12 MESSAGE CARDS WITH ENVELOPES    |[12, message, cards, with, envelopes]     |
+# |BLUE HARMONICA IN BOX              |[blue, harmonica, in, box]                |
+# |GUMBALL COAT RACK                  |[gumball, coat, rack]                     |
+# |SKULLS  WATER TRANSFER TATTOOS     |[skulls, , water, transfer, tattoos]      |
+# |FELTCRAFT GIRL AMELIE KIT          |[feltcraft, girl, amelie, kit]            |
+# |CAMOUFLAGE LED TORCH               |[camouflage, led, torch]                  |
+# |WHITE SKULL HOT WATER BOTTLE       |[white, skull, hot, water, bottle]        |
+# |ENGLISH ROSE HOT WATER BOTTLE      |[english, rose, hot, water, bottle]       |
+# |HOT WATER BOTTLE KEEP CALM         |[hot, water, bottle, keep, calm]          |
+# |SCOTTIE DOG HOT WATER BOTTLE       |[scottie, dog, hot, water, bottle]        |
+# |ROSE CARAVAN DOORSTOP              |[rose, caravan, doorstop]                 |
+# |GINGHAM HEART  DOORSTOP RED        |[gingham, heart, , doorstop, red]         |
+# |STORAGE TIN VINTAGE LEAF           |[storage, tin, vintage, leaf]             |
+# |SET OF 4 KNICK KNACK TINS POPPIES  |[set, of, 4, knick, knack, tins, poppies] |
+# |POPCORN HOLDER                     |[popcorn, holder]                         |
+# |GROW A FLYTRAP OR SUNFLOWER IN TIN |[grow, a, flytrap, or, sunflower, in, tin]|
+# |AIRLINE BAG VINTAGE WORLD CHAMPION |[airline, bag, vintage, world, champion]  |
+# |AIRLINE BAG VINTAGE JET SET BROWN  |[airline, bag, vintage, jet, set, brown]  |
+# +-----------------------------------+------------------------------------------+
+# only showing top 20 rows
 
 # Java 의 regexp 를 사용할 수 있다.
 # 공백이 2개 이상일 경우를 다음과 같이 처리할 수 있다.
 
 from pyspark.ml.feature import RegexTokenizer
 
-rt = RegexTokenizer()\
-  .setInputCol("Description")\
-  .setOutputCol("DescOut")\
-  .setPattern("\s+")\
-  .setToLowercase(True)
+rt = (RegexTokenizer()
+  .setInputCol("Description")
+  .setOutputCol("DescOut")
+  .setPattern("\s+")
+  .setToLowercase(True))
 rt.transform(sales.select("Description")).show(20, False)
 
+# +-----------------------------------+------------------------------------------+
+# |Description                        |DescOut                                   |
+# +-----------------------------------+------------------------------------------+
+# |RABBIT NIGHT LIGHT                 |[rabbit, night, light]                    |
+# |DOUGHNUT LIP GLOSS                 |[doughnut, lip, gloss]                    |
+# |12 MESSAGE CARDS WITH ENVELOPES    |[12, message, cards, with, envelopes]     |
+# |BLUE HARMONICA IN BOX              |[blue, harmonica, in, box]                |
+# |GUMBALL COAT RACK                  |[gumball, coat, rack]                     |
+# |SKULLS  WATER TRANSFER TATTOOS     |[skulls, water, transfer, tattoos]        |
+# |FELTCRAFT GIRL AMELIE KIT          |[feltcraft, girl, amelie, kit]            |
+# |CAMOUFLAGE LED TORCH               |[camouflage, led, torch]                  |
+# |WHITE SKULL HOT WATER BOTTLE       |[white, skull, hot, water, bottle]        |
+# |ENGLISH ROSE HOT WATER BOTTLE      |[english, rose, hot, water, bottle]       |
+# |HOT WATER BOTTLE KEEP CALM         |[hot, water, bottle, keep, calm]          |
+# |SCOTTIE DOG HOT WATER BOTTLE       |[scottie, dog, hot, water, bottle]        |
+# |ROSE CARAVAN DOORSTOP              |[rose, caravan, doorstop]                 |
+# |GINGHAM HEART  DOORSTOP RED        |[gingham, heart, doorstop, red]           |
+# |STORAGE TIN VINTAGE LEAF           |[storage, tin, vintage, leaf]             |
+# |SET OF 4 KNICK KNACK TINS POPPIES  |[set, of, 4, knick, knack, tins, poppies] |
+# |POPCORN HOLDER                     |[popcorn, holder]                         |
+# |GROW A FLYTRAP OR SUNFLOWER IN TIN |[grow, a, flytrap, or, sunflower, in, tin]|
+# |AIRLINE BAG VINTAGE WORLD CHAMPION |[airline, bag, vintage, world, champion]  |
+# |AIRLINE BAG VINTAGE JET SET BROWN  |[airline, bag, vintage, jet, set, brown]  |
+# +-----------------------------------+------------------------------------------+
+# only showing top 20 rows
 
 # `.setGaps(False)` 를 하면 pattern 이 매칭하는 단어들만 리턴된다.
 # 여기서 "gaps" = "delimiters" 라서 pattern 이 delimiter 를 의미하는지(True, default), word 를 의미하는지(False) 를 선택하는 옵션이다.
 # 
 # ES 에 stopwords 와 keepwords 가 있는데, 서로 반대의 개념이다.
-# 여기서 `.setGaps(True)` 이면 stopwords 로 동작하고,
-# `.setGaps(False)` 이면 keepwords 로 동작하고, 
+# 여기서 `.setGaps(True)` 이면 regexp pattern 이 stopwords 로 동작하고,
+# `.setGaps(False)` 이면 regexp pattern 이 keepwords 로 동작하고, 
 
 from pyspark.ml.feature import RegexTokenizer
 
-rt = RegexTokenizer()\
-  .setInputCol("Description")\
-  .setOutputCol("DescOut")\
-  .setPattern("\w+")\
-  .setGaps(False)\
-  .setToLowercase(True)
+rt = (RegexTokenizer()
+  .setInputCol("Description")
+  .setOutputCol("DescOut")
+  .setPattern("\w+")
+  .setGaps(False)   # <-- 여기
+  .setToLowercase(True))
 rt.transform(sales.select("Description")).show(20, False)
 
+# +-----------------------------------+------------------------------------------+
+# |Description                        |DescOut                                   |
+# +-----------------------------------+------------------------------------------+
+# |RABBIT NIGHT LIGHT                 |[rabbit, night, light]                    |
+# |DOUGHNUT LIP GLOSS                 |[doughnut, lip, gloss]                    |
+# |12 MESSAGE CARDS WITH ENVELOPES    |[12, message, cards, with, envelopes]     |
+# |BLUE HARMONICA IN BOX              |[blue, harmonica, in, box]                |
+# |GUMBALL COAT RACK                  |[gumball, coat, rack]                     |
+# |SKULLS  WATER TRANSFER TATTOOS     |[skulls, water, transfer, tattoos]        |
+# |FELTCRAFT GIRL AMELIE KIT          |[feltcraft, girl, amelie, kit]            |
+# |CAMOUFLAGE LED TORCH               |[camouflage, led, torch]                  |
+# |WHITE SKULL HOT WATER BOTTLE       |[white, skull, hot, water, bottle]        |
+# |ENGLISH ROSE HOT WATER BOTTLE      |[english, rose, hot, water, bottle]       |
+# |HOT WATER BOTTLE KEEP CALM         |[hot, water, bottle, keep, calm]          |
+# |SCOTTIE DOG HOT WATER BOTTLE       |[scottie, dog, hot, water, bottle]        |
+# |ROSE CARAVAN DOORSTOP              |[rose, caravan, doorstop]                 |
+# |GINGHAM HEART  DOORSTOP RED        |[gingham, heart, doorstop, red]           |
+# |STORAGE TIN VINTAGE LEAF           |[storage, tin, vintage, leaf]             |
+# |SET OF 4 KNICK KNACK TINS POPPIES  |[set, of, 4, knick, knack, tins, poppies] |
+# |POPCORN HOLDER                     |[popcorn, holder]                         |
+# |GROW A FLYTRAP OR SUNFLOWER IN TIN |[grow, a, flytrap, or, sunflower, in, tin]|
+# |AIRLINE BAG VINTAGE WORLD CHAMPION |[airline, bag, vintage, world, champion]  |
+# |AIRLINE BAG VINTAGE JET SET BROWN  |[airline, bag, vintage, jet, set, brown]  |
+# +-----------------------------------+------------------------------------------+
+# only showing top 20 rows
 
 # stopwords 를 제거한다.
 # 아쉽게도 korean 은 지원하지 않는다.
@@ -227,11 +302,37 @@ from pyspark.ml.feature import StopWordsRemover
 
 # englishStopWords = StopWordsRemover.loadDefaultStopWords("english")
 englishStopWords = ["a", "an", "the", "rabbit"]
-stops = StopWordsRemover()\
-  .setStopWords(englishStopWords)\
-  .setInputCol("DescOut")
+stops = (StopWordsRemover()
+  .setStopWords(englishStopWords)
+  # .setStopWords(["rabbit", "night", "light"])   # <-- 이렇게 custom stopwords 를 설정할 수 있다.
+  .setInputCol("DescOut"))
 stops.transform(tokenized).show(truncate=False)
 
+# +-----------------------------------+------------------------------------------+-----------------------------------------+
+# |Description                        |DescOut                                   |StopWordsRemover_fa96c037009e__output    |
+# +-----------------------------------+------------------------------------------+-----------------------------------------+
+# |RABBIT NIGHT LIGHT                 |[rabbit, night, light]                    |[night, light]                           |
+# |DOUGHNUT LIP GLOSS                 |[doughnut, lip, gloss]                    |[doughnut, lip, gloss]                   |
+# |12 MESSAGE CARDS WITH ENVELOPES    |[12, message, cards, with, envelopes]     |[12, message, cards, with, envelopes]    |
+# |BLUE HARMONICA IN BOX              |[blue, harmonica, in, box]                |[blue, harmonica, in, box]               |
+# |GUMBALL COAT RACK                  |[gumball, coat, rack]                     |[gumball, coat, rack]                    |
+# |SKULLS  WATER TRANSFER TATTOOS     |[skulls, , water, transfer, tattoos]      |[skulls, , water, transfer, tattoos]     |
+# |FELTCRAFT GIRL AMELIE KIT          |[feltcraft, girl, amelie, kit]            |[feltcraft, girl, amelie, kit]           |
+# |CAMOUFLAGE LED TORCH               |[camouflage, led, torch]                  |[camouflage, led, torch]                 |
+# |WHITE SKULL HOT WATER BOTTLE       |[white, skull, hot, water, bottle]        |[white, skull, hot, water, bottle]       |
+# |ENGLISH ROSE HOT WATER BOTTLE      |[english, rose, hot, water, bottle]       |[english, rose, hot, water, bottle]      |
+# |HOT WATER BOTTLE KEEP CALM         |[hot, water, bottle, keep, calm]          |[hot, water, bottle, keep, calm]         |
+# |SCOTTIE DOG HOT WATER BOTTLE       |[scottie, dog, hot, water, bottle]        |[scottie, dog, hot, water, bottle]       |
+# |ROSE CARAVAN DOORSTOP              |[rose, caravan, doorstop]                 |[rose, caravan, doorstop]                |
+# |GINGHAM HEART  DOORSTOP RED        |[gingham, heart, , doorstop, red]         |[gingham, heart, , doorstop, red]        |
+# |STORAGE TIN VINTAGE LEAF           |[storage, tin, vintage, leaf]             |[storage, tin, vintage, leaf]            |
+# |SET OF 4 KNICK KNACK TINS POPPIES  |[set, of, 4, knick, knack, tins, poppies] |[set, of, 4, knick, knack, tins, poppies]|
+# |POPCORN HOLDER                     |[popcorn, holder]                         |[popcorn, holder]                        |
+# |GROW A FLYTRAP OR SUNFLOWER IN TIN |[grow, a, flytrap, or, sunflower, in, tin]|[grow, flytrap, or, sunflower, in, tin]  |
+# |AIRLINE BAG VINTAGE WORLD CHAMPION |[airline, bag, vintage, world, champion]  |[airline, bag, vintage, world, champion] |
+# |AIRLINE BAG VINTAGE JET SET BROWN  |[airline, bag, vintage, jet, set, brown]  |[airline, bag, vintage, jet, set, brown] |
+# +-----------------------------------+------------------------------------------+-----------------------------------------+
+# only showing top 20 rows
 
 # ngram 을 만들 수 있다.
 
@@ -242,26 +343,81 @@ bigram = NGram().setInputCol("DescOut").setN(2).setOutputCol("res_2")
 unigram.transform(tokenized.select("DescOut")).show(truncate=False)
 bigram.transform(tokenized.select("DescOut")).show(truncate=False)
 
+# +------------------------------------------+------------------------------------------+
+# |DescOut                                   |res_1                                     |
+# +------------------------------------------+------------------------------------------+
+# |[rabbit, night, light]                    |[rabbit, night, light]                    |
+# |[doughnut, lip, gloss]                    |[doughnut, lip, gloss]                    |
+# |[12, message, cards, with, envelopes]     |[12, message, cards, with, envelopes]     |
+# |[blue, harmonica, in, box]                |[blue, harmonica, in, box]                |
+# |[gumball, coat, rack]                     |[gumball, coat, rack]                     |
+# |[skulls, , water, transfer, tattoos]      |[skulls, , water, transfer, tattoos]      |
+# |[feltcraft, girl, amelie, kit]            |[feltcraft, girl, amelie, kit]            |
+# |[camouflage, led, torch]                  |[camouflage, led, torch]                  |
+# |[white, skull, hot, water, bottle]        |[white, skull, hot, water, bottle]        |
+# |[english, rose, hot, water, bottle]       |[english, rose, hot, water, bottle]       |
+# |[hot, water, bottle, keep, calm]          |[hot, water, bottle, keep, calm]          |
+# |[scottie, dog, hot, water, bottle]        |[scottie, dog, hot, water, bottle]        |
+# |[rose, caravan, doorstop]                 |[rose, caravan, doorstop]                 |
+# |[gingham, heart, , doorstop, red]         |[gingham, heart, , doorstop, red]         |
+# |[storage, tin, vintage, leaf]             |[storage, tin, vintage, leaf]             |
+# |[set, of, 4, knick, knack, tins, poppies] |[set, of, 4, knick, knack, tins, poppies] |
+# |[popcorn, holder]                         |[popcorn, holder]                         |
+# |[grow, a, flytrap, or, sunflower, in, tin]|[grow, a, flytrap, or, sunflower, in, tin]|
+# |[airline, bag, vintage, world, champion]  |[airline, bag, vintage, world, champion]  |
+# |[airline, bag, vintage, jet, set, brown]  |[airline, bag, vintage, jet, set, brown]  |
+# +------------------------------------------+------------------------------------------+
+# only showing top 20 rows
+# 
+# +------------------------------------------+-------------------------------------------------------------------+
+# |DescOut                                   |res_2                                                              |
+# +------------------------------------------+-------------------------------------------------------------------+
+# |[rabbit, night, light]                    |[rabbit night, night light]                                        |
+# |[doughnut, lip, gloss]                    |[doughnut lip, lip gloss]                                          |
+# |[12, message, cards, with, envelopes]     |[12 message, message cards, cards with, with envelopes]            |
+# |[blue, harmonica, in, box]                |[blue harmonica, harmonica in, in box]                             |
+# |[gumball, coat, rack]                     |[gumball coat, coat rack]                                          |
+# |[skulls, , water, transfer, tattoos]      |[skulls ,  water, water transfer, transfer tattoos]                |
+# |[feltcraft, girl, amelie, kit]            |[feltcraft girl, girl amelie, amelie kit]                          |
+# |[camouflage, led, torch]                  |[camouflage led, led torch]                                        |
+# |[white, skull, hot, water, bottle]        |[white skull, skull hot, hot water, water bottle]                  |
+# |[english, rose, hot, water, bottle]       |[english rose, rose hot, hot water, water bottle]                  |
+# |[hot, water, bottle, keep, calm]          |[hot water, water bottle, bottle keep, keep calm]                  |
+# |[scottie, dog, hot, water, bottle]        |[scottie dog, dog hot, hot water, water bottle]                    |
+# |[rose, caravan, doorstop]                 |[rose caravan, caravan doorstop]                                   |
+# |[gingham, heart, , doorstop, red]         |[gingham heart, heart ,  doorstop, doorstop red]                   |
+# |[storage, tin, vintage, leaf]             |[storage tin, tin vintage, vintage leaf]                           |
+# |[set, of, 4, knick, knack, tins, poppies] |[set of, of 4, 4 knick, knick knack, knack tins, tins poppies]     |
+# |[popcorn, holder]                         |[popcorn holder]                                                   |
+# |[grow, a, flytrap, or, sunflower, in, tin]|[grow a, a flytrap, flytrap or, or sunflower, sunflower in, in tin]|
+# |[airline, bag, vintage, world, champion]  |[airline bag, bag vintage, vintage world, world champion]          |
+# |[airline, bag, vintage, jet, set, brown]  |[airline bag, bag vintage, vintage jet, jet set, set brown]        |
+# +------------------------------------------+-------------------------------------------------------------------+
+# only showing top 20 rows
+
+# ==> 근데 unigram 은 의미가 없고 bigram 부터 의미가 있다.
 
 # CountVectorizer 는 단어 vector 를 숫자 vector 로 변환시킨다.
 # 그냥 vector 의 elements 를 단어 -> 숫자로 바꾸는 것이다.
 # 개념적으로는 Bag of Words(BOW) 를 나타낸다.
+# 
+# 단어의 count = TF 이다.
 
 from pyspark.ml.feature import CountVectorizer
 
-cv = CountVectorizer()\
-  .setInputCol("DescOut")\
-  .setOutputCol("countVec")\
-  .setVocabSize(500)\
-  .setMinTF(1)\
-  .setMinDF(2)
+cv = (CountVectorizer()
+  .setInputCol("DescOut")
+  .setOutputCol("countVec")
+  .setVocabSize(500)
+  .setMinTF(1)
+  .setMinDF(2))
 fittedCV = cv.fit(tokenized)
 fittedCV.transform(tokenized).show(truncate=False)
 
 # +-----------------------------------+------------------------------------------+---------------------------------------------------+
 # |Description                        |DescOut                                   |countVec                                           |
 # +-----------------------------------+------------------------------------------+---------------------------------------------------+
-# |RABBIT NIGHT LIGHT                 |[rabbit, night, light]                    |(500,[149,185,212],[1.0,1.0,1.0])                  |
+# |RABBIT NIGHT LIGHT                 |[rabbit, night, light]                    |(500,[150,185,212],[1.0,1.0,1.0])                  |
 # |DOUGHNUT LIP GLOSS                 |[doughnut, lip, gloss]                    |(500,[462,463,492],[1.0,1.0,1.0])                  |
 # |12 MESSAGE CARDS WITH ENVELOPES    |[12, message, cards, with, envelopes]     |(500,[35,41,166],[1.0,1.0,1.0])                    |
 # ...
@@ -269,22 +425,8 @@ fittedCV.transform(tokenized).show(truncate=False)
 # countVec 의 형태를 보면, 3개의 원소를 가지는 tuple 이다.
 # sparse vector 이고, (총 어휘 크기, 어휘에 포함된 단어 색인, 특정 단어의 출현 빈도) 를 의미한다.
 
-tfIdfIn = tokenized\
-  .where("array_contains(DescOut, 'red')")\
-  .select("DescOut")\
-  .limit(10)
-tfIdfIn.show(n=10, truncate=False)
-
-# +---------------------------------------+
-# |DescOut                                |
-# +---------------------------------------+
-# |[gingham, heart, , doorstop, red]      |
-# |[red, floral, feltcraft, shoulder, bag]|
-# |[alarm, clock, bakelike, red]          |
-# ...
-# 
-# 위와 같이 DataFrame 의 다른 연산과 조합이 가능하다.
-
+assert set([fittedCV.vocabulary[e] for e in [150,185,212]]) == set(['light', 'rabbit', 'night'])
+assert fittedCV.getVocabSize() == 500
 
 # HashingTF 가 이전의 CountVectorizer 와 다른 점은 hashing 과정을 포함한다는 것이다.
 # 그러면 얻을 수 있는 장점은 단어 -> hashing -> 숫자 로 변환을 하기 때문에, 숫자 -> 단어 로 역추적이 불가능해진다.
@@ -299,30 +441,54 @@ tfIdfIn.show(n=10, truncate=False)
 
 from pyspark.ml.feature import HashingTF, IDF
 
-tf = HashingTF()\
-  .setInputCol("DescOut")\
-  .setOutputCol("TFOut")\
-  .setNumFeatures(10000)
-idf = IDF()\
-  .setInputCol("TFOut")\
-  .setOutputCol("IDFOut")\
-  .setMinDocFreq(2)
+tfIdfIn = (tokenized
+  .where("array_contains(DescOut, 'red')")
+  .select("DescOut")
+  .limit(10))
+tfIdfIn.show(n=10, truncate=False)
 
-idf.fit(tf.transform(tfIdfIn)).transform(tf.transform(tfIdfIn)).show(n=10, truncate=False)
+# +---------------------------------------+
+# |DescOut                                |
+# +---------------------------------------+
+# |[gingham, heart, , doorstop, red]      |
+# |[red, floral, feltcraft, shoulder, bag]|
+# |[alarm, clock, bakelike, red]          |
+# |[pin, cushion, babushka, red]          |
+# |[red, retrospot, mini, cases]          |
+# |[red, kitchen, scales]                 |
+# |[gingham, heart, , doorstop, red]      |
+# |[large, red, babushka, notebook]       |
+# |[red, retrospot, oven, glove]          |
+# |[red, retrospot, plate]                |
+# +---------------------------------------+
+# 
+# 'red' 에 대한 IDF 를 구하기 위해서 위와 같이 데이터를 만들었다.
 
-# +---------------------------------------+-----------------------------------------------------+------------------------------------------------------------
-# |DescOut                                |TFOut                                                |IDFOut
-# +---------------------------------------+-----------------------------------------------------+------------------------------------------------------------
+tf = (HashingTF()
+  .setInputCol("DescOut")
+  .setOutputCol("TFOut")
+  .setNumFeatures(10000))
+idf = (IDF()
+  .setInputCol("TFOut")   # <-- 이전 tf 의 결과 column 을 연결 한다.
+  .setOutputCol("IDFOut")
+  .setMinDocFreq(2))
+
+res = tf.transform(tfIdfIn)
+idf.fit(res).transform(res).show(n=10, truncate=False)   # <-- IDF 는 전체를 미리 scan 해야 구할 수 있기 때문에 fit 과 transform 연이어 해야 한다.
+
+# +---------------------------------------+-----------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+# |DescOut                                |TFOut                                                |IDFOut                                                                                                           |
+# +---------------------------------------+-----------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+# |[gingham, heart, , doorstop, red]      |(10000,[52,804,3372,6594,9808],[1.0,1.0,1.0,1.0,1.0])|(10000,[52,804,3372,6594,9808],[0.0,1.2992829841302609,1.2992829841302609,1.2992829841302609,1.2992829841302609])|
+# |[red, floral, feltcraft, shoulder, bag]|(10000,[50,52,415,6756,8005],[1.0,1.0,1.0,1.0,1.0])  |(10000,[50,52,415,6756,8005],[0.0,0.0,0.0,0.0,0.0])                                                              |
 # |[alarm, clock, bakelike, red]          |(10000,[52,4995,8737,9001],[1.0,1.0,1.0,1.0])        |(10000,[52,4995,8737,9001],[0.0,0.0,0.0,0.0])                                                                    |
-# |[pin, cushion, babushka, red]          |(10000,[52,610,2490,7153],[1.0,1.0,1.0,1.0])         |(10000,[52,610,2490,7153],[0.0,0.0,0.0,1.2992829841302609])                                                      |
-# |[red, retrospot, mini, cases]          |(10000,[52,547,6703,8448],[1.0,1.0,1.0,1.0])         |(10000,[52,547,6703,8448],[0.0,0.0,0.0,1.0116009116784799])
 # ...
 # 
-# TF 값과 IDF 값을 얻을 수 있음에 주의해라.
+# 위 방식으로 TF 값과 IDF 값을 모두 얻을 수 있음에 주의해라.
 # CountVectorizer 는 TF 값만 얻을 수 있다.
 
 
-# 학습 및 사용이 쉽고, 엔티티 인식, 모호성 제거, 구문 분석, 태그 지정 및 기계 번역을 포함한 여러 가지 자연어 처리 애플리케이션에서 유용하게 사용된다.
+# word2vec 은 학습 및 사용이 쉽고, 엔티티 인식, 모호성 제거, 구문 분석, 태그 지정 및 기계 번역을 포함한 여러 가지 자연어 처리 애플리케이션에서 유용하게 사용된다.
 # 토큰 형태이면서 연속적이고 자유형의 텍스트에서 가장 잘 동작한다.
 
 from pyspark.ml.feature import Word2Vec
@@ -335,29 +501,30 @@ documentDF = spark.createDataFrame([
 ], ["text"])
 
 # Learn a mapping from words to Vectors.
-word2Vec = Word2Vec(vectorSize=3, minCount=0, inputCol="text",
-  outputCol="result")
+word2Vec = Word2Vec(vectorSize=3, minCount=0, inputCol="text", outputCol="result")
 model = word2Vec.fit(documentDF)
 result = model.transform(documentDF)
 for row in result.collect():
     text, vector = row
     print("Text: [%s] => \nVector: %s\n" % (", ".join(text), str(vector)))
 
+# 이름이 "word"2vec 인데, 실제 동작은 "sentence"2vec 임에 주의해라.
+
 # Text: [Hi, I, heard, about, Spark] =>
-# Vector: [-0.08150363978929819,-0.019268991798162462,-0.06999367889366113]
+# Vector: [0.0017009951174259187,0.049393982067704206,0.05914585739374161]
 # 
 # Text: [I, wish, Java, could, use, case, classes] =>
-# Vector: [-0.004938643159610884,-0.033724620938301086,-0.01584516681448024]
+# Vector: [-0.021818850255970444,-0.06204076483845711,-0.07141843544585363]
 # 
 # Text: [Logistic, regression, models, are, neat] =>
-# Vector: [0.003283527493476868,-0.06138550490140915,-0.010659397765994073]
+# Vector: [-0.08085853531956673,0.03675719648599625,-0.036668000370264055]
 
 #################################################################################################################
 
 # 대표적인 차원 축소 테크닉이다.
 # feature selection 도 포함하고 있다.
 # 유일한 단점은 feature 값이 변경되어서 해석이 불가능해지고, 원복도 안된다는 점이 있다.
-# 또한 k (축소할 차원 값) 을 설정하는게 무척 중요한데, 공식적인 가이드가 없다.
+# 또한 k (축소 결과의 차원 값) 을 설정하는게 무척 중요한데, 공식적인 가이드가 없다.
 
 from pyspark.ml.feature import PCA
 
@@ -372,8 +539,8 @@ pca.fit(scaleDF).transform(scaleDF).show(n=20, truncate=False)
 # |0  |[1.0,0.1,-1.0]|[0.0713719499248417,-0.4526654888147805]  |
 # ...
 # 
-# PCA 로 차원 축소를 하면 features 는 의미를 알 수 없는 값들이 되어 버린다.
-
+# PCA 로 차원 축소를 하면 column "res" 는 의미를 알 수 없는 값들이 되어 버린다.
+# 왜냐하면 차원 축들이 변경되었기 때문에 그 안의 vectors 도 따라서 위치값이 바뀌었기 때문이다.
 
 # RFormula 는 domain 지식을 활용할 수 있게 만든다.
 # 즉, domain 지식을 반영한 interactions 을 추가할 수 있고, 어떤 terms 는 삭제할 수 도 있다
@@ -415,20 +582,20 @@ pe.transform(scaleDF).show(truncate=False)
 from pyspark.ml.feature import ChiSqSelector, Tokenizer
 
 tkn = Tokenizer().setInputCol("Description").setOutputCol("DescOut")
-tokenized = tkn\
-  .transform(sales.select("Description", "CustomerId"))\
-  .where("CustomerId IS NOT NULL")
-prechi = fittedCV.transform(tokenized)\
-  .where("CustomerId IS NOT NULL")
+tokenized = (tkn
+  .transform(sales.select("Description", "CustomerId"))
+  .where("CustomerId IS NOT NULL"))
+prechi = (fittedCV.transform(tokenized)
+  .where("CustomerId IS NOT NULL"))
 
-chisq = ChiSqSelector()\
-  .setFeaturesCol("countVec")\
-  .setLabelCol("CustomerId")\
-  .setNumTopFeatures(2)\
-  .setOutputCol("res")
+chisq = (ChiSqSelector()
+  .setFeaturesCol("countVec")
+  .setLabelCol("CustomerId")
+  .setNumTopFeatures(2)
+  .setOutputCol("res"))
 
-chisq.fit(prechi).transform(prechi)\
-  .drop("customerId", "Description", "DescOut").show(truncate=False)
+(chisq.fit(prechi).transform(prechi)
+  .drop("customerId", "Description", "DescOut").show(truncate=False))
 
 # +---------------------------------------------------+-------------------+
 # |countVec                                           |res                |
@@ -457,7 +624,7 @@ fittedPCA.write().overwrite().save(path_prefix + "/tmp/fittedPCA")
 
 # 변환자 불러오기
 
-from pyspark.ml.feature import PCAModel
+from pyspark.ml.feature import PCAModel           # <-- 동일한 class 명에 "Model" 만 붙이면 된다.
 
 loadedPCA = PCAModel.load(path_prefix + "/tmp/fittedPCA")
 loadedPCA.transform(scaleDF).show(truncate=False)
