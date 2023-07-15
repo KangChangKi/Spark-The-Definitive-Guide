@@ -464,16 +464,9 @@ fittedCV.transform(tokenized).show(truncate=False)
 assert set([fittedCV.vocabulary[e] for e in [150,185,212]]) == set(['light', 'rabbit', 'night'])
 assert fittedCV.getVocabSize() == 500
 
-# HashingTF 가 이전의 CountVectorizer 와 다른 점은 hashing 과정을 포함한다는 것이다.
-# 그러면 얻을 수 있는 장점은 단어 -> hashing -> 숫자 로 변환을 하기 때문에, 숫자 -> 단어 로 역추적이 불가능해진다.
-#
-# usecase 1:
-# 그래서 HashingTF 는 비밀을 다룰 때 좋다.
-# 반면, 데이터가 비밀이 아니라면 CountVectorizer 를 쓰는게 더 효율적이라서 좋다.
-#
-# usecase 2:
-# HashingTF 와 IDF 를 조합해서 단어별 TF 값과, IDF 값을 얻을 수 있다.
-# 반면, CountVectorizer 는 IDF 와 조합할 수 없다.
+# HashingTF 가 이전의 CountVectorizer 와 다른 점은 hashing 을 통해서 큰 단어 vector 를 작은 vector 로 표현한다는 것이다.
+# HashingTF는 메모리 효율적이고 대규모 텍스트 데이터에 적합하며, 출현 빈도를 정확하게 반영하지 않을 수 있다.
+# 반면에 CountVectorizer는 출현 빈도를 정확하게 반영하지만 메모리 사용이 더 많이 필요하며, 대규모 데이터셋에서는 제약이 있을 수 있다.
 
 from pyspark.ml.feature import HashingTF, IDF
 
